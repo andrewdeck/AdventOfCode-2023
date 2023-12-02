@@ -9,10 +9,13 @@ import (
 	"time"
 )
 
-const test = `1abc2
-pqr3stu8vwx
-a1b2c3d4e5f
-treb7uchet`
+const test = `two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen`
 
 func main() {
 	startTime := time.Now()
@@ -25,9 +28,10 @@ func main() {
 
 	// partOne(test)
 	fmt.Printf("Part 1: %v\n", time.Since(startTime))
-	// startTime = time.Now()
+	startTime = time.Now()
+	partTwo(test)
 	// partTwo(input)
-	// fmt.Printf("Part 2: %v\n", time.Since(startTime))
+	fmt.Printf("Part 2: %v\n", time.Since(startTime))
 
 	// var mem runtime.MemStats
 	// runtime.ReadMemStats(&mem)
@@ -46,7 +50,6 @@ func partOne(input string) {
 		digitsArray := regex.Split(line, -1)
 		digits := strings.Join(digitsArray, "")
 		number := string(digits[0]) + string(digits[len(digits)-1])
-		fmt.Println(number)
 		num, err := strconv.Atoi(number)
 		if err != nil {
 			panic(err)
@@ -54,4 +57,45 @@ func partOne(input string) {
 		sum += num
 	}
 	fmt.Println(sum)
+}
+
+func partTwo(input string) {
+	sum := 0
+	lines := strings.Split(input, "\n")
+
+	regex := regexp.MustCompile("[^0-9]+")
+
+	for _, line := range lines {
+		line = ReplaceStringsWithNumbers(line)
+		digitsArray := regex.Split(line, -1)
+		digits := strings.Join(digitsArray, "")
+		number := string(digits[0]) + string(digits[len(digits)-1])
+		num, err := strconv.Atoi(number)
+		fmt.Println(num)
+		if err != nil {
+			panic(err)
+		}
+		sum += num
+	}
+	fmt.Println(sum)
+}
+
+func ReplaceStringsWithNumbers(str string) string {
+	newStr := str
+	words := map[string]string{
+		"one":   "1",
+		"two":   "2",
+		"three": "3",
+		"four":  "4",
+		"five":  "5",
+		"six":   "6",
+		"seven": "7",
+		"eight": "8",
+		"nine":  "9",
+	}
+
+	for word, num := range words {
+		newStr = strings.ReplaceAll(newStr, word, num)
+	}
+	return newStr
 }
