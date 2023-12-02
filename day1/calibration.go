@@ -29,8 +29,8 @@ func main() {
 	// partOne(test)
 	fmt.Printf("Part 1: %v\n", time.Since(startTime))
 	startTime = time.Now()
-	partTwo(test)
-	// partTwo(input)
+	// partTwo(test)
+	partTwo(input)
 	fmt.Printf("Part 2: %v\n", time.Since(startTime))
 
 	// var mem runtime.MemStats
@@ -63,15 +63,10 @@ func partTwo(input string) {
 	sum := 0
 	lines := strings.Split(input, "\n")
 
-	regex := regexp.MustCompile("[^0-9]+")
-
 	for _, line := range lines {
-		line = ReplaceStringsWithNumbers(line)
-		digitsArray := regex.Split(line, -1)
-		digits := strings.Join(digitsArray, "")
+		digits := ExtractNumbers(line)
 		number := string(digits[0]) + string(digits[len(digits)-1])
 		num, err := strconv.Atoi(number)
-		fmt.Println(num)
 		if err != nil {
 			panic(err)
 		}
@@ -80,8 +75,12 @@ func partTwo(input string) {
 	fmt.Println(sum)
 }
 
-func ReplaceStringsWithNumbers(str string) string {
-	newStr := str
+func ExtractNumbers(str string) string {
+	newStr := []byte(str)
+	result := []byte{}
+
+	regex := regexp.MustCompile("one|two|three|four|five|six|seven|eight|nine|[0-9]")
+
 	words := map[string]string{
 		"one":   "1",
 		"two":   "2",
@@ -94,8 +93,17 @@ func ReplaceStringsWithNumbers(str string) string {
 		"nine":  "9",
 	}
 
-	for word, num := range words {
-		newStr = strings.ReplaceAll(newStr, word, num)
+	location := regex.FindIndex(newStr)
+	for location != nil {
+		word := string(newStr[location[0]:location[1]])
+		number := words[string(word)]
+		if number == "" {
+			number = word
+		}
+		result = append(result, []byte(number)...)
+		newStr = newStr[location[0]+1:]
+		location = regex.FindIndex(newStr)
 	}
-	return newStr
+
+	return string(result)
 }
