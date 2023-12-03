@@ -26,10 +26,10 @@ func main() {
 
 	// PartOne(test)
 	fmt.Printf("Part 1: %v\n", time.Since(startTime))
-	// startTime = time.Now()
-	// partTwo(test)
-	// partTwo(input)
-	// fmt.Printf("Part 2: %v\n", time.Since(startTime))
+	startTime = time.Now()
+	// PartTwo(test)
+	PartTwo(input)
+	fmt.Printf("Part 2: %v\n", time.Since(startTime))
 
 	// var mem runtime.MemStats
 	// runtime.ReadMemStats(&mem)
@@ -45,8 +45,17 @@ func PartOne(input string) {
 	for _, game := range games {
 		if possible, index := PossibleGame(game); possible {
 			sum += index
-			fmt.Printf("Valid Game: %v\n", index)
 		}
+	}
+	fmt.Println(sum)
+}
+
+func PartTwo(input string) {
+	sum := 0
+	games := strings.Split(input, "\n")
+
+	for _, game := range games {
+		sum += GamePower(game)
 	}
 	fmt.Println(sum)
 }
@@ -89,4 +98,27 @@ func PossibleGame(game string) (bool, int) {
 		}
 	}
 	return possible, index
+}
+
+func GamePower(game string) int {
+	gamePattern := regexp.MustCompile("Game ([0-9]+):")
+	max := make(map[string]int)
+
+	reveals := strings.Split(gamePattern.ReplaceAllString(game, ""), ";")
+	for _, reveal := range reveals {
+		groups := strings.Split(reveal, ",")
+		for _, group := range groups {
+			fields := strings.Fields(group)
+			color := fields[1]
+			count, err := strconv.Atoi(fields[0])
+			if err != nil {
+				panic(err)
+			}
+			if count > max[color] {
+				max[color] = count
+			}
+		}
+	}
+
+	return max["red"] * max["green"] * max["blue"]
 }
