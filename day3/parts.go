@@ -1,6 +1,7 @@
 package main
 
 import (
+	"adventofcode"
 	"fmt"
 	"os"
 	"strconv"
@@ -35,12 +36,7 @@ func main() {
 	// PartTwo(test)
 	PartTwo(input)
 	fmt.Printf("Part 2: %v\n", time.Since(startTime))
-
-	// var mem runtime.MemStats
-	// runtime.ReadMemStats(&mem)
-
-	// fmt.Printf("Allocated memory: %v bytes\n", mem.Alloc)
-	// fmt.Printf("Total memory allocated (since start): %v bytes\n", mem.TotalAlloc)
+	adventofcode.PrintMemoryUsage()
 }
 
 func PartOne(input string) {
