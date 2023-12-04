@@ -27,10 +27,10 @@ func main() {
 	PartOne(input)
 	fmt.Printf("Part 1: %v\n", time.Since(startTime))
 
-	// startTime = time.Now()
+	startTime = time.Now()
 	// PartTwo(test)
-	// PartTwo(input)
-	// fmt.Printf("Part 2: %v\n", time.Since(startTime))
+	PartTwo(input)
+	fmt.Printf("Part 2: %v\n", time.Since(startTime))
 	// adventofcode.PrintMemoryUsage()
 }
 
@@ -58,5 +58,39 @@ func PartOne(input string) {
 		}
 	}
 
+	fmt.Println(sum)
+}
+
+func PartTwo(input string) {
+	cards := strings.Split(input, "\n")
+	cardPattern := regexp.MustCompile("Card [0-9]+:")
+
+	cardCount := make([]int, len(cards))
+
+	for i, card := range cards {
+		cardCount[i]++
+		parts := strings.Split(cardPattern.ReplaceAllString(card, ""), "|")
+		winning := strings.Fields(parts[0])
+		mine := strings.Fields(parts[1])
+
+		count := 0
+		for _, num := range mine {
+			for _, w := range winning {
+				if num == w {
+					count++
+				}
+			}
+		}
+		for j := 0; j < cardCount[i]; j++ {
+			for x := 1; x <= count; x++ {
+				cardCount[i+x]++
+			}
+		}
+	}
+
+	sum := 0
+	for _, card := range cardCount {
+		sum += card
+	}
 	fmt.Println(sum)
 }
