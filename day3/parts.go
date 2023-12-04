@@ -31,10 +31,10 @@ func main() {
 	PartOne(input)
 	fmt.Printf("Part 1: %v\n", time.Since(startTime))
 
-	// startTime = time.Now()
+	startTime = time.Now()
 	// PartTwo(test)
-	// PartTwo(input)
-	// fmt.Printf("Part 2: %v\n", time.Since(startTime))
+	PartTwo(input)
+	fmt.Printf("Part 2: %v\n", time.Since(startTime))
 
 	// var mem runtime.MemStats
 	// runtime.ReadMemStats(&mem)
@@ -96,4 +96,60 @@ func PartOne(input string) {
 
 func IsSymbol(r rune) bool {
 	return !unicode.IsDigit(r) && r != '.'
+}
+
+func PartTwo(input string) {
+	lines := strings.Split(input, "\n")
+	height := len(lines)
+	width := len(lines[0])
+	data := make([][]rune, height)
+	for i := range data {
+		data[i] = make([]rune, width)
+	}
+
+	for y, line := range lines {
+		runes := []rune(line)
+		copy(data[y], runes)
+	}
+
+	gearMap := map[string][]int{}
+
+	for y := range data {
+		for x := 0; x < width; x++ {
+			if unicode.IsDigit(data[y][x]) {
+				end := x
+				for xi := x + 1; xi < width && unicode.IsDigit(data[y][xi]); xi++ {
+					end = xi
+				}
+				number, err := strconv.Atoi(string(data[y][x : end+1]))
+				if err != nil {
+					panic(err)
+				}
+
+				for _, dy := range []int{-1, 0, 1} {
+					yi := y + dy
+					for xi := x - 1; xi < end+2; xi++ {
+						if yi >= 0 && yi < height && xi >= 0 && xi < width {
+							if data[yi][xi] == '*' {
+								key := fmt.Sprintf("%v:%v", xi, yi)
+								gearMap[key] = append(gearMap[key], number)
+							}
+						}
+					}
+				}
+
+				x = end + 1 // prevent double counting
+			}
+		}
+	}
+
+	sum := 0
+
+	for _, gears := range gearMap {
+		if len(gears) == 2 {
+			sum += gears[0] * gears[1]
+		}
+	}
+
+	fmt.Println(sum)
 }
