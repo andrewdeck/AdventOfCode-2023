@@ -55,10 +55,10 @@ func main() {
 	PartOne(input)
 	fmt.Printf("Part 1: %v\n", time.Since(startTime))
 
-	// startTime = time.Now()
+	startTime = time.Now()
 	// PartTwo(test)
-	// PartTwo(input)
-	// fmt.Printf("Part 2: %v\n", time.Since(startTime))
+	PartTwo(input)
+	fmt.Printf("Part 2: %v\n", time.Since(startTime))
 	// adventofcode.PrintMemoryUsage()
 }
 
@@ -143,5 +143,32 @@ func PartOne(input string) {
 }
 
 func PartTwo(input string) {
+	seeds, sourceMap, rangesForSource := ParseInput(input)
 
+	lowestLoc := math.MaxInt
+
+	for i := 0; i < len(seeds); i += 2 {
+		for j := 0; j < seeds[i+1]; j++ {
+			sourceId := seeds[i] + j
+
+			source := "seed"
+			for source != "location" {
+				destination := sourceMap[source]
+				ranges := rangesForSource[source]
+				for _, r := range ranges {
+					if sourceId >= r.source && sourceId < r.source+r.offset {
+						sourceId = r.destination + (sourceId - r.source)
+						break
+					}
+				}
+				source = destination
+			}
+			if sourceId < lowestLoc {
+				lowestLoc = sourceId
+			}
+		}
+
+	}
+
+	fmt.Println(lowestLoc)
 }
