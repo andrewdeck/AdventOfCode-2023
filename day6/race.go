@@ -7,11 +7,11 @@ import (
 	"time"
 )
 
-const test = `Time:      7  15   30
-Distance:  9  40  200`
+const test = `Time:      71530
+Distance:  940200`
 
-const input = `Time:        53     83     72     88
-Distance:   333   1635   1289   1532`
+const input = `Time:        53837288
+Distance:   333163512891532`
 
 func main() {
 	startTime := time.Now()
