@@ -63,17 +63,24 @@ func (a ByRank) Less(i, j int) bool {
 	}
 }
 
-var cardRank = []rune{'A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'}
+var cardRank = []rune{'A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J'}
 
 func HandOrdinality(hand []rune) int {
 	cardCount := map[rune]int{}
 	for _, card := range hand {
 		cardCount[card]++
 	}
+	jCount := 0
+	if cardCount['J'] > 0 && cardCount['J'] != 5 {
+		jCount = cardCount['J']
+		cardCount['J'] = 0
+	}
 	counts := []int{}
 	for _, count := range cardCount {
 		counts = append(counts, count)
 	}
+	slices.Sort(counts)
+	counts[len(counts)-1] += jCount
 	countMap := map[int]int{}
 	for _, count := range counts {
 		countMap[count]++
@@ -124,7 +131,7 @@ func PartOne(input string) {
 
 	sum := 0
 	for i, hand := range hands {
-		fmt.Println(string(hand.cards))
+		fmt.Println(string(hand.cards), hand.ordinality)
 		sum += (i + 1) * hand.wager
 	}
 	fmt.Println(sum)
