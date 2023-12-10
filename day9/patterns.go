@@ -43,6 +43,7 @@ func PartOne(input string) {
 	}
 	sum := 0
 	for _, sequence := range history {
+		slices.Reverse(sequence)
 		sum += NextValueInSequence(sequence)
 	}
 	fmt.Println(sum)
