@@ -19,10 +19,9 @@ func main() {
 	PartOne(input)
 	fmt.Printf("Part 1: %v\n", time.Since(startTime))
 
-	// startTime = time.Now()
-	// PartTwo(test)
-	// PartTwo(input)
-	// fmt.Printf("Part 2: %v\n", time.Since(startTime))
+	startTime = time.Now()
+	PartTwo(input)
+	fmt.Printf("Part 2: %v\n", time.Since(startTime))
 	// adventofcode.PrintMemoryUsage()
 }
 
@@ -73,6 +72,68 @@ func PartOne(input string) {
 		path = pipes[nextPos.y][nextPos.x]
 	}
 	fmt.Println(steps / 2)
+}
+
+func PartTwo(input string) {
+	pipes, start := ParsePipes(input)
+	path := []Pipe{start}
+	var pathDir rune
+
+	if start.pos.x < len(pipes[0]) {
+		eastPipe := pipes[start.pos.y][start.pos.x+1]
+		if slices.Contains(eastPipe.outputs, 'W') {
+			path = append(path, eastPipe)
+			pathDir = 'E'
+		}
+	} else if start.pos.x > 0 {
+		westPipe := pipes[start.pos.y][start.pos.x-1]
+		if slices.Contains(westPipe.outputs, 'E') {
+			path = append(path, westPipe)
+			pathDir = 'W'
+		}
+	} else if start.pos.y > 0 {
+		northPipe := pipes[start.pos.y-1][start.pos.x]
+		if slices.Contains(northPipe.outputs, 'S') {
+			path = append(path, northPipe)
+			pathDir = 'S'
+		}
+	} else if start.pos.y < len(pipes) {
+		southPipe := pipes[start.pos.y+1][start.pos.x]
+		if slices.Contains(southPipe.outputs, 'N') {
+			path = append(path, southPipe)
+			pathDir = 'N'
+		}
+	}
+
+	// store the path in slice
+	for path[len(path)-1].pos.x != start.pos.x || path[len(path)-1].pos.y != start.pos.y {
+		curPipe := path[len(path)-1]
+		nextPos := curPipe.nextPosition(pathDir)
+		if nextPos.x > curPipe.pos.x {
+			pathDir = 'E'
+		} else if nextPos.x < curPipe.pos.x {
+			pathDir = 'W'
+		} else if nextPos.y > curPipe.pos.y {
+			pathDir = 'S'
+		} else {
+			pathDir = 'N'
+		}
+		path = append(path, pipes[nextPos.y][nextPos.x])
+	}
+
+	/* Thanks to reddit.com/r/adventofcode for the help -
+	This is a combination of Shoelace Formula (to find area)
+	and Pick's Theorem (to find the number of interior verticies) */
+	shoelaceSum := 0
+	for i, a := range path {
+		b := path[(i+1)%len(path)]
+		shoelaceSum += a.pos.x*b.pos.y - a.pos.y*b.pos.x
+	}
+	area := shoelaceSum / 2
+	if area < 0 {
+		area *= -1
+	}
+	fmt.Println(area - len(path)/2 + 1)
 }
 
 type Position struct {
