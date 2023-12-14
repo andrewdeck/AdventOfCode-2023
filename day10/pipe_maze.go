@@ -2,26 +2,21 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"slices"
 	"strings"
 	"time"
 )
 
-const test = `7-F7-
-.FJ|7
-SJLL7
-|F--J
-LJ.LJ`
-
 func main() {
-	// file, err := os.ReadFile("input.txt")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// input := string(file)
+	// file, err := os.ReadFile("test.txt")
+	file, err := os.ReadFile("input.txt")
+	if err != nil {
+		panic(err)
+	}
+	input := string(file)
 	startTime := time.Now()
-	PartOne(test)
-	// PartOne(input)
+	PartOne(input)
 	fmt.Printf("Part 1: %v\n", time.Since(startTime))
 
 	// startTime = time.Now()
@@ -33,39 +28,51 @@ func main() {
 
 func PartOne(input string) {
 	pipes, start := ParsePipes(input)
-	paths := []Pipe{}
+	var path Pipe
+	var pathDir rune
 
 	if start.pos.x < len(pipes[0]) {
 		eastPipe := pipes[start.pos.y][start.pos.x+1]
 		if slices.Contains(eastPipe.outputs, 'W') {
-			paths = append(paths, eastPipe)
+			path = eastPipe
+			pathDir = 'E'
 		}
-	}
-	if start.pos.x > 0 {
+	} else if start.pos.x > 0 {
 		westPipe := pipes[start.pos.y][start.pos.x-1]
 		if slices.Contains(westPipe.outputs, 'E') {
-			paths = append(paths, westPipe)
+			path = westPipe
+			pathDir = 'W'
 		}
-	}
-	if start.pos.y > 0 {
+	} else if start.pos.y > 0 {
 		northPipe := pipes[start.pos.y-1][start.pos.x]
 		if slices.Contains(northPipe.outputs, 'S') {
-			paths = append(paths, northPipe)
+			path = northPipe
+			pathDir = 'S'
 		}
-	}
-	if start.pos.y < len(pipes) {
+	} else if start.pos.y < len(pipes) {
 		southPipe := pipes[start.pos.y+1][start.pos.x]
 		if slices.Contains(southPipe.outputs, 'N') {
-			paths = append(paths, southPipe)
+			path = southPipe
+			pathDir = 'N'
 		}
 	}
 
-	pipeA := paths[0]
-	pipeB := paths[1]
-	steps := 1
-	for pipeA.pos.x != pipeB.pos.x && pipeA.pos.y != pipeB.pos.y {
-
+	var steps int
+	// loop until back at start
+	for steps = 1; path.pos.x != start.pos.x || path.pos.y != start.pos.y; steps++ {
+		nextPos := path.nextPosition(pathDir)
+		if nextPos.x > path.pos.x {
+			pathDir = 'E'
+		} else if nextPos.x < path.pos.x {
+			pathDir = 'W'
+		} else if nextPos.y > path.pos.y {
+			pathDir = 'S'
+		} else {
+			pathDir = 'N'
+		}
+		path = pipes[nextPos.y][nextPos.x]
 	}
+	fmt.Println(steps / 2)
 }
 
 type Position struct {
