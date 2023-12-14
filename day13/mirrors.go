@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"reflect"
 	"strings"
 	"time"
 )
@@ -32,9 +31,9 @@ func PartOne(input string) {
 	each vertical line of reflection; to that, also add 100 multiplied by the
 	number of rows above each horizontal line of reflection. */
 	for _, image := range images {
-		if ok, index := HorizontalSymmetry(image); ok {
+		if ok, index := HorizontalSymmetry(image, 0); ok {
 			sum += (100 * (index + 1))
-		} else if ok, index := VerticalSymmetry(image); ok {
+		} else if ok, index := VerticalSymmetry(image, 0); ok {
 			sum += (index + 1)
 		}
 	}
@@ -48,9 +47,9 @@ func PartTwo(input string) {
 	each vertical line of reflection; to that, also add 100 multiplied by the
 	number of rows above each horizontal line of reflection. */
 	for _, image := range images {
-		if ok, index := HorizontalSymmetryWithSmudge(image); ok {
+		if ok, index := HorizontalSymmetry(image, 1); ok {
 			sum += (100 * (index + 1))
-		} else if ok, index := VerticalSymmetryWithSmudge(image); ok {
+		} else if ok, index := VerticalSymmetry(image, 1); ok {
 			sum += (index + 1)
 		}
 	}
@@ -77,7 +76,7 @@ func ParseInput(input string) [][][]bool {
 	return images
 }
 
-func VerticalSymmetryWithSmudge(image [][]bool) (bool, int) {
+func VerticalSymmetry(image [][]bool, errors int) (bool, int) {
 	height := len(image)
 	width := len(image[0])
 	hasSymmetry := false
@@ -93,7 +92,7 @@ func VerticalSymmetryWithSmudge(image [][]bool) (bool, int) {
 			}
 		}
 
-		if diffCount == 1 {
+		if diffCount == errors {
 			hasSymmetry = true
 			index = x
 			break
@@ -103,7 +102,7 @@ func VerticalSymmetryWithSmudge(image [][]bool) (bool, int) {
 	return hasSymmetry, index
 }
 
-func HorizontalSymmetryWithSmudge(image [][]bool) (bool, int) {
+func HorizontalSymmetry(image [][]bool, errors int) (bool, int) {
 	height := len(image)
 	width := len(image[0])
 	hasSymmetry := false
@@ -118,56 +117,7 @@ func HorizontalSymmetryWithSmudge(image [][]bool) (bool, int) {
 				}
 			}
 		}
-		if diffCount == 1 {
-			hasSymmetry = true
-			index = y
-			break
-		}
-	}
-	return hasSymmetry, index
-}
-
-func VerticalSymmetry(image [][]bool) (bool, int) {
-	height := len(image)
-	width := len(image[0])
-	hasSymmetry := false
-	index := 0
-	for x := 0; x < width-1; x++ {
-		foundSymmetry := true
-	inner:
-		for dx := 0; x-dx >= 0 && x+dx+1 < width; dx++ {
-			for y := 0; y < height; y++ {
-				if image[y][x-dx] != image[y][x+dx+1] {
-					foundSymmetry = false
-					break inner
-				}
-			}
-		}
-
-		if foundSymmetry {
-			hasSymmetry = true
-			index = x
-			break
-		}
-	}
-
-	return hasSymmetry, index
-}
-
-func HorizontalSymmetry(image [][]bool) (bool, int) {
-	height := len(image)
-	hasSymmetry := false
-	index := 0
-
-	for y := 0; y < height-1; y++ {
-		foundSymmetry := true
-		for dy := 0; y-dy >= 0 && y+dy+1 < height; dy++ {
-			if !reflect.DeepEqual(image[y-dy], image[y+dy+1]) {
-				foundSymmetry = false
-				break
-			}
-		}
-		if foundSymmetry {
+		if diffCount == errors {
 			hasSymmetry = true
 			index = y
 			break
