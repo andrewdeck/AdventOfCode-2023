@@ -18,14 +18,93 @@ func main() {
 	PartOne(input)
 	fmt.Printf("Part 1: %v\n", time.Since(startTime))
 
-	// startTime = time.Now()
-	// PartTwo(input)
-	// fmt.Printf("Part 2: %v\n", time.Since(startTime))
+	startTime = time.Now()
+	PartTwo(input, 1000000)
+	fmt.Printf("Part 2: %v\n", time.Since(startTime))
 	// adventofcode.PrintMemoryUsage()
 }
 
 type Galaxy struct {
 	x, y int
+}
+
+func PartTwo(input string, age int) {
+	lines := strings.Split(input, "\n")
+	// 1. parse universe
+	universe := make([][]bool, len(lines))
+	for i, line := range lines {
+		runes := []rune(line)
+		row := make([]bool, len(runes))
+		for x, r := range runes {
+			row[x] = r == '#'
+		}
+		universe[i] = row
+	}
+	// 2. find expansion lines
+	columns := []int{}
+	rows := []int{}
+	for y, row := range universe {
+		noGalaxies := true
+		for _, val := range row {
+			if val {
+				noGalaxies = false
+				break
+			}
+		}
+		if noGalaxies {
+			rows = append(rows, y)
+		}
+	}
+	for x := range universe[0] {
+		noGalaxies := true
+		for _, row := range universe {
+			if row[x] {
+				noGalaxies = false
+				break
+			}
+		}
+		if noGalaxies {
+			columns = append(columns, x)
+		}
+	}
+	// 3. extract galaxy locations
+	galaxies := []Galaxy{}
+	for y, row := range universe {
+		for x, val := range row {
+			if val {
+				galaxies = append(galaxies, Galaxy{x: x, y: y})
+			}
+		}
+	}
+	// 4. calculate shortest path between every pair, aka manhattan distance
+	sum := 0
+	for i := 0; i < len(galaxies)-1; i++ {
+		for j := i + 1; j < len(galaxies); j++ {
+			a, b := galaxies[i], galaxies[j]
+			lowX, highX := a.x, b.x
+			if highX < lowX {
+				highX, lowX = a.x, b.x
+			}
+			lowY, highY := a.y, b.y
+			if highY < lowY {
+				highY, lowY = a.y, b.y
+			}
+			gaps := 0
+			for _, x := range columns {
+				if x > lowX && x < highX {
+					gaps++
+				}
+			}
+			for _, y := range rows {
+				if y > lowY && y < highY {
+					gaps++
+				}
+			}
+
+			sum += (highX - lowX) + (highY - lowY) + gaps*(age-1)
+		}
+	}
+	fmt.Println(sum)
 }
 
 func PartOne(input string) {
