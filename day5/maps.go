@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -145,29 +146,47 @@ func PartOne(input string) {
 func PartTwo(input string) {
 	seeds, sourceMap, rangesForSource := ParseInput(input)
 
-	lowestLoc := math.MaxInt
+	var wg sync.WaitGroup
+	ch := make(chan int)
 
 	for i := 0; i < len(seeds); i += 2 {
-		for j := 0; j < seeds[i+1]; j++ {
-			sourceId := seeds[i] + j
-
-			source := "seed"
-			for source != "location" {
-				destination := sourceMap[source]
-				ranges := rangesForSource[source]
-				for _, r := range ranges {
-					if sourceId >= r.source && sourceId < r.source+r.offset {
-						sourceId = r.destination + (sourceId - r.source)
-						break
+		i := i
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			localMin := math.MaxInt
+			for j := 0; j < seeds[i+1]; j++ {
+				sourceId := seeds[i] + j
+				source := "seed"
+				for source != "location" {
+					destination := sourceMap[source]
+					ranges := rangesForSource[source]
+					for _, r := range ranges {
+						if sourceId >= r.source && sourceId < r.source+r.offset {
+							sourceId = r.destination + (sourceId - r.source)
+							break
+						}
 					}
+					source = destination
 				}
-				source = destination
+				if sourceId < localMin {
+					localMin = sourceId
+				}
 			}
-			if sourceId < lowestLoc {
-				lowestLoc = sourceId
-			}
-		}
+			ch <- localMin
+		}()
+	}
+	lowestLoc := math.MaxInt
 
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+
+	for value := range ch {
+		if value < lowestLoc {
+			lowestLoc = value
+		}
 	}
 
 	fmt.Println(lowestLoc)
